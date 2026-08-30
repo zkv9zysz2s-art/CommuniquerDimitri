@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#232B3E">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icone-180.png">
+<link rel="icon" href="icone-192.png">
+<title>Je communique</title>
+<style>
+* { -webkit-box-sizing: border-box; box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0; height: 100%; width: 100%;
+  overflow: hidden;
+  background: #FBF8F3;
+  color: #232B3E;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-text-size-adjust: none;
+}
+#app { position: absolute; left: 0; top: 0; right: 0; bottom: 0; }
+
+/* ---- barre des categories ---- */
+#rail {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 17%;
+  background: #F2EDE4;
+  border-right: 2px solid #E2D9C9;
+}
+#titre {
+  position: absolute; left: 0; right: 0; top: 0; height: 46px;
+  line-height: 46px; text-align: center;
+  font-size: 15px; font-weight: bold; letter-spacing: 0.5px;
+  color: #8A7E6B;
+}
+#cats { position: absolute; left: 0; right: 0; top: 46px; bottom: 0; }
+.cat {
+  display: block; position: relative;
+  margin: 0 8px 8px 8px;
+  border-radius: 12px;
+  background: #FFFFFF;
+  border: 3px solid #FFFFFF;
+  text-align: center;
+  font-size: 19px; font-weight: bold;
+  color: #232B3E;
+  overflow: hidden;
+}
+.cat .bar { position: absolute; left: 0; top: 0; bottom: 0; width: 9px; }
+.cat.on { border-color: #232B3E; }
+
+/* ---- grille des pictos ---- */
+#grid {
+  position: absolute; left: 17%; right: 0; top: 0; bottom: 0;
+  font-size: 0;
+}
+.cell {
+  display: inline-block; vertical-align: top;
+  padding: 7px;
+}
+.card {
+  position: relative; width: 100%; height: 100%;
+  background: #FFFFFF;
+  border: 4px solid #DDD5C7;
+  border-radius: 16px;
+  overflow: hidden;
+}
+.card .pic { position: absolute; left: 4%; right: 4%; text-align: center; }
+.card .pic img { max-width: 100%; max-height: 100%; }
+.card .txtonly {
+  position: absolute; left: 4px; right: 4px; top: 50%;
+  margin-top: -0.6em;
+  font-weight: bold; line-height: 1.1;
+}
+.card .lab {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  font-weight: bold; text-align: center; color: #FFFFFF;
+  white-space: nowrap; overflow: hidden;
+}
+
+/* tailles selon le nombre de lignes de la grille */
+#grid.g2 .cell { width: 50%; height: 50%; padding: 10px; }
+#grid.g2 .card .pic  { top: 10px; bottom: 46px; }
+#grid.g2 .card .lab  { height: 42px; line-height: 42px; font-size: 27px; }
+#grid.g2 .card .txtonly { font-size: 44px; }
+#grid.g2 .card.sanspicto .pic { bottom: 14px; }
+#grid.g2 .card.sanspicto .lab { height: 14px; font-size: 0; }
+
+#grid.g3 .cell { width: 33.333%; height: 50%; padding: 9px; }
+#grid.g3 .card .pic  { top: 8px; bottom: 42px; }
+#grid.g3 .card .lab  { height: 38px; line-height: 38px; font-size: 24px; }
+#grid.g3 .card .txtonly { font-size: 36px; }
+#grid.g3 .card.sanspicto .pic { bottom: 13px; }
+#grid.g3 .card.sanspicto .lab { height: 13px; font-size: 0; }
+
+#grid.g4 .cell { width: 33.333%; height: 33.333%; padding: 8px; }
+#grid.g4 .card .pic  { top: 7px; bottom: 38px; }
+#grid.g4 .card .lab  { height: 34px; line-height: 34px; font-size: 21px; }
+#grid.g4 .card .txtonly { font-size: 32px; }
+#grid.g4 .card.sanspicto .pic { bottom: 12px; }
+#grid.g4 .card.sanspicto .lab { height: 12px; font-size: 0; }
+
+#grid.g5 .cell { width: 25%; height: 33.333%; padding: 7px; }
+#grid.g5 .card .pic  { top: 6px; bottom: 36px; }
+#grid.g5 .card .lab  { height: 32px; line-height: 32px; font-size: 20px; }
+#grid.g5 .card .txtonly { font-size: 30px; }
+#grid.g5 .card.sanspicto .pic { bottom: 12px; }
+#grid.g5 .card.sanspicto .lab { height: 12px; font-size: 0; }
+
+#grid.g6 .cell { width: 25%; height: 25%; padding: 6px; }
+#grid.g6 .card .pic  { top: 5px; bottom: 30px; }
+#grid.g6 .card .lab  { height: 27px; line-height: 27px; font-size: 17px; }
+#grid.g6 .card .txtonly { font-size: 24px; }
+#grid.g6 .card.sanspicto .pic { bottom: 10px; }
+#grid.g6 .card.sanspicto .lab { height: 10px; font-size: 0; }
+
+#grid.g7 .cell { width: 20%; height: 25%; padding: 5px; }
+#grid.g7 .card .pic  { top: 4px; bottom: 26px; }
+#grid.g7 .card .lab  { height: 24px; line-height: 24px; font-size: 15px; }
+#grid.g7 .card .txtonly { font-size: 21px; }
+#grid.g7 .card.sanspicto .pic { bottom: 9px; }
+#grid.g7 .card.sanspicto .lab { height: 9px; font-size: 0; }
+
+/* ---- bande de pagination, seulement s'il y a plusieurs pages ---- */
+#pages {
+  display: none;
+  position: absolute; left: 17%; right: 0; bottom: 0; height: 54px;
+  background: #F2EDE4; border-top: 2px solid #E2D9C9;
+}
+#pages.on { display: block; }
+#grid.avecpages { bottom: 54px; }
+.fleche {
+  position: absolute; top: 7px; height: 40px; width: 100px;
+  line-height: 34px; text-align: center;
+  border: 3px solid #C9BFAC; border-radius: 12px; background: #FFFFFF;
+  font-size: 21px; font-weight: bold; color: #232B3E;
+}
+.fleche.g { left: 10px; }
+.fleche.d { right: 10px; }
+.fleche.off { opacity: 0.25; }
+#puces {
+  position: absolute; left: 124px; right: 124px; top: 7px; height: 40px;
+  text-align: center; font-size: 0; overflow: hidden; white-space: nowrap;
+}
+.puce {
+  display: inline-block; min-width: 42px; height: 40px; line-height: 34px;
+  margin: 0 4px; padding: 0 9px;
+  border: 3px solid #C9BFAC; border-radius: 12px; background: #FFFFFF;
+  font-size: 18px; font-weight: bold; color: #232B3E;
+}
+.puce.on { border-color: #232B3E; background: #232B3E; color: #FFFFFF; }
+
+/* ---- mode maitre : appui long de 3 s sur le titre ---- */
+#panneau {
+  display: none;
+  position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+  background: #FBF8F3;
+  font-size: 15px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+#pbarre {
+  position: relative; height: 52px; background: #232B3E; color: #FFF;
+  line-height: 52px; padding: 0 14px; font-size: 18px; font-weight: bold;
+}
+#fermer {
+  position: absolute; right: 8px; top: 8px; height: 36px; line-height: 36px;
+  padding: 0 18px; border-radius: 10px; background: #FFFFFF; color: #232B3E;
+  font-size: 16px; font-weight: bold;
+}
+#pcorps { padding: 14px; }
+#pcorps h3 { margin: 16px 0 8px 0; font-size: 15px; color: #8A7E6B;
+             text-transform: uppercase; letter-spacing: 0.5px; }
+#pcorps h3:first-child { margin-top: 0; }
+.bascule {
+  position: relative; display: block;
+  padding: 11px 12px 11px 46px;
+  margin-bottom: 6px;
+  border: 2px solid #E2D9C9; border-radius: 10px;
+  background: #FFFFFF; font-size: 17px;
+}
+.bascule .coche {
+  position: absolute; left: 10px; top: 50%; margin-top: -12px;
+  width: 24px; height: 24px; border-radius: 6px;
+  border: 2px solid #C9BFAC; background: #FFF;
+}
+.bascule.oui .coche { background: #4E7A48; border-color: #4E7A48; }
+.bascule.oui .coche:after {
+  content: ""; position: absolute; left: 6px; top: 2px;
+  width: 6px; height: 12px; border: solid #FFF;
+  border-width: 0 3px 3px 0;
+  -webkit-transform: rotate(45deg); transform: rotate(45deg);
+}
+.bascule.non { color: #A79C88; background: #F5F1E9; }
+.bouton {
+  display: inline-block; margin: 4px 8px 4px 0;
+  padding: 12px 20px; border-radius: 10px;
+  background: #FFFFFF; border: 2px solid #232B3E;
+  font-size: 16px; font-weight: bold;
+}
+.note { color: #8A7E6B; font-size: 14px; line-height: 1.5; margin: 10px 0; }
+.alerte { color: #B4462F; font-weight: bold; }
+.okv { color: #4E7A48; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div id="rail">
+    <div id="titre">Je communique</div>
+    <div id="cats"></div>
+  </div>
+  <div id="grid"></div>
+  <div id="pages">
+    <div class="fleche g" data-dir="-1">&#9664;</div>
+    <div id="puces"></div>
+    <div class="fleche d" data-dir="1">&#9654;</div>
+  </div>
+</div>
+
+<div id="panneau">
+  <div id="pbarre">Mode maître<div id="fermer">Fermer</div></div>
+  <div id="pcorps"></div>
+</div>
+
+<audio id="son" preload="auto"></audio>
+
+<script src="version.js"></script>
+<script src="vocabulaire.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var V = window.VOCABULAIRE;
+  var TOUTES = V.categories;
+  var CLE = "jecommunique.masques";
+
+  var visibles = [];        /* categories effectivement affichees */
+  var actif = 0;            /* index dans visibles */
+  var page = 0;             /* page courante dans la categorie */
+  var masques = {};         /* { "cat:ecole": 1, "mot:boire": 1 } */
+  var stockageOk = true;
+
+  var son = document.getElementById("son");
+  var grid = document.getElementById("grid");
+  var railCats = document.getElementById("cats");
+  var panneau = document.getElementById("panneau");
+  var pcorps = document.getElementById("pcorps");
+  var bandePages = document.getElementById("pages");
+  var puces = document.getElementById("puces");
+  var fg = bandePages.getElementsByTagName("div")[0];
+  var fd = bandePages.getElementsByTagName("div")[2];
+  var debloque = false;
+  var manquants = { images: [], sons: [] };
+  var dernier = 0;
+  var presse = null;
+
+  /* ---------- utilitaires ---------- */
+
+  function el(tag, cls) {
+    var d = document.createElement(tag);
+    if (cls) { d.className = cls; }
+    return d;
+  }
+
+  function dansListe(arr, v) {
+    for (var i = 0; i < arr.length; i++) { if (arr[i] === v) { return true; } }
+    return false;
+  }
+
+  /* ---------- memoire des elements masques ----------
+     Le fichier vocabulaire.js reste la reference : si la memoire du
+     navigateur est vide ou inutilisable, tout reapparait, l'application
+     ne peut pas se retrouver cassee. */
+
+  function lireMasques() {
+    masques = {};
+    try {
+      var s = window.localStorage.getItem(CLE);
+      if (s) {
+        var a = JSON.parse(s);
+        for (var i = 0; i < a.length; i++) { masques[a[i]] = 1; }
+      }
+    } catch (e) {
+      stockageOk = false;
+    }
+  }
+
+  function ecrireMasques() {
+    var a = [], k;
+    for (k in masques) { if (masques.hasOwnProperty(k)) { a.push(k); } }
+    try {
+      window.localStorage.setItem(CLE, JSON.stringify(a));
+      stockageOk = true;
+    } catch (e) {
+      stockageOk = false;
+    }
+  }
+
+  function estMasque(cle) { return masques[cle] === 1; }
+
+  function basculer(cle) {
+    if (masques[cle] === 1) { delete masques[cle]; } else { masques[cle] = 1; }
+    ecrireMasques();
+  }
+
+  /* ---------- calcul de ce qui est affiche ---------- */
+
+  function motsVisibles(cat) {
+    var r = [];
+    for (var i = 0; i < cat.mots.length; i++) {
+      if (!estMasque("mot:" + cat.mots[i].id)) { r.push(cat.mots[i]); }
+    }
+    return r;
+  }
+
+  function calculerVisibles() {
+    visibles = [];
+    for (var i = 0; i < TOUTES.length; i++) {
+      var c = TOUTES[i];
+      if (estMasque("cat:" + c.id)) { continue; }
+      var m = motsVisibles(c);
+      if (m.length === 0) { continue; }
+      visibles.push({ id: c.id, nom: c.nom, couleur: c.couleur,
+                      parPage: c.parPage, mots: m });
+    }
+    /* filet de securite : on n'affiche jamais un ecran vide */
+    if (visibles.length === 0) {
+      for (var j = 0; j < TOUTES.length; j++) {
+        visibles.push({ id: TOUTES[j].id, nom: TOUTES[j].nom,
+                        couleur: TOUTES[j].couleur, parPage: TOUTES[j].parPage,
+                        mots: TOUTES[j].mots });
+      }
+    }
+    if (actif >= visibles.length) { actif = 0; }
+    if (page >= nbPages()) { page = 0; }
+  }
+
+  /* combien de pictogrammes par page pour la categorie affichee.
+     Si la categorie ne precise rien, tout tient sur une seule page. */
+  function parPage() {
+    var c = visibles[actif];
+    if (!c) { return 12; }
+    var n = parseInt(c.parPage, 10);
+    if (!n || n < 1) { return Math.max(1, c.mots.length); }
+    return n;
+  }
+
+  function nbPages() {
+    var c = visibles[actif];
+    if (!c) { return 1; }
+    return Math.max(1, Math.ceil(c.mots.length / parPage()));
+  }
+
+  /* ---------- son ---------- */
+
+  var SILENCE = "data:audio/wav;base64,UklGRpYDAABXQVZFZm10IBAAAAABAAEAIlYAAESsAAACABAAZGF0YXIDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=";
+
+  function debloquerAudio() {
+    if (debloque) { return; }
+    debloque = true;
+    try {
+      son.src = SILENCE;
+      var p = son.play();
+      if (p && p["catch"]) { p["catch"](function () {}); }
+    } catch (e) {}
+  }
+
+  function parler(mot) {
+    var t = new Date().getTime();
+    if (t - dernier < 120) { return; }
+    dernier = t;
+    try { son.pause(); son.currentTime = 0; } catch (e) {}
+    son.src = "sons/" + mot.id + ".wav";
+    try {
+      var p = son.play();
+      if (p && p["catch"]) { p["catch"](function () { secours(mot); }); }
+    } catch (e) {
+      secours(mot);
+    }
+  }
+
+  function secours(mot) {
+    try {
+      if (window.speechSynthesis) {
+        var u = new window.SpeechSynthesisUtterance(mot.dit);
+        u.lang = "fr-FR";
+        u.rate = 0.9;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(u);
+      }
+    } catch (e) {}
+  }
+
+  son.addEventListener("error", function () {
+    var s = son.getAttribute("src") || "";
+    if (s.indexOf("sons/") !== 0) { return; }
+    var court = s.substring(5, s.length - 4);
+    if (!dansListe(manquants.sons, court)) { manquants.sons.push(court); }
+    for (var c = 0; c < TOUTES.length; c++) {
+      for (var m = 0; m < TOUTES[c].mots.length; m++) {
+        if (TOUTES[c].mots[m].id === court) { secours(TOUTES[c].mots[m]); return; }
+      }
+    }
+  }, false);
+
+  /* ---------- construction de l'ecran ---------- */
+
+  function construireRail() {
+    railCats.innerHTML = "";
+    var h = 100 / visibles.length;
+    for (var i = 0; i < visibles.length; i++) {
+      var c = visibles[i];
+      var b = el("div", "cat");
+      b.style.height = "calc(" + h + "% - 8px)";
+      b.setAttribute("data-cat", String(i));
+      var bar = el("div", "bar");
+      bar.style.background = c.couleur;
+      b.appendChild(bar);
+      var t = el("span");
+      t.appendChild(document.createTextNode(c.nom));
+      t.style.position = "absolute";
+      t.style.left = "9px";
+      t.style.right = "0";
+      t.style.top = "50%";
+      t.style.marginTop = "-0.6em";
+      b.appendChild(t);
+      railCats.appendChild(b);
+    }
+    marquerActif();
+  }
+
+  function marquerActif() {
+    var n = railCats.childNodes;
+    for (var i = 0; i < n.length; i++) {
+      n[i].className = (i === actif) ? "cat on" : "cat";
+    }
+  }
+
+  /* la grille s'adapte au nombre de mots : moins il y en a, plus c'est gros */
+  function classeGrille(n) {
+    if (n <= 4) { return "g2"; }    /* 2 x 2 */
+    if (n <= 6) { return "g3"; }    /* 3 x 2 */
+    if (n <= 9) { return "g4"; }    /* 3 x 3 */
+    if (n <= 12) { return "g5"; }   /* 4 x 3 */
+    if (n <= 16) { return "g6"; }   /* 4 x 4 */
+    return "g7";                    /* 5 x 4 */
+  }
+
+  function construirePages() {
+    var n = nbPages();
+    if (n < 2) {
+      bandePages.className = "";
+      grid.className = grid.className.replace(" avecpages", "");
+      return;
+    }
+    bandePages.className = "on";
+    if (grid.className.indexOf("avecpages") < 0) { grid.className += " avecpages"; }
+
+    puces.innerHTML = "";
+    if (n <= 7) {
+      for (var i = 0; i < n; i++) {
+        var p = el("div", "puce" + (i === page ? " on" : ""));
+        p.setAttribute("data-page", String(i));
+        p.appendChild(document.createTextNode(String(i + 1)));
+        puces.appendChild(p);
+      }
+    } else {
+      var t = el("div", "puce on");
+      t.style.minWidth = "90px";
+      t.appendChild(document.createTextNode((page + 1) + " / " + n));
+      puces.appendChild(t);
+    }
+    fg.className = "fleche g" + (page === 0 ? " off" : "");
+    fd.className = "fleche d" + (page >= n - 1 ? " off" : "");
+  }
+
+  function allerPage(p) {
+    var n = nbPages();
+    if (p < 0 || p > n - 1 || p === page) { return; }
+    page = p;
+    construireGrille();
+  }
+
+  function construireGrille() {
+    var c = visibles[actif];
+    presse = null;
+    grid.innerHTML = "";
+
+    var pp = parPage();
+    grid.className = classeGrille(pp);
+    construirePages();
+
+    var debut = page * pp;
+    var liste = c.mots.slice(debut, debut + pp);
+
+    for (var i = 0; i < liste.length; i++) {
+      var mot = liste[i];
+      var cell = el("div", "cell");
+      cell.setAttribute("data-mot", String(debut + i));
+      var card = el("div", "card");
+      card.style.borderColor = c.couleur;
+
+      var pic = el("div", "pic");
+      var img = document.createElement("img");
+      img.setAttribute("alt", "");
+      (function (motL, picL, cardL, couleur) {
+        img.onerror = function () {
+          if (!dansListe(manquants.images, motL.id)) { manquants.images.push(motL.id); }
+          cardL.className = "card sanspicto";
+          picL.innerHTML = "";
+          var t = el("div", "txtonly");
+          t.style.color = couleur;
+          t.appendChild(document.createTextNode(motL.mot));
+          picL.appendChild(t);
+        };
+      }(mot, pic, card, c.couleur));
+      img.src = "pictos/" + mot.id + ".png";
+      pic.appendChild(img);
+      card.appendChild(pic);
+
+      var lab = el("div", "lab");
+      lab.style.background = c.couleur;
+      lab.appendChild(document.createTextNode(mot.mot));
+      card.appendChild(lab);
+
+      cell.appendChild(card);
+      grid.appendChild(cell);
+    }
+  }
+
+  function reconstruire() {
+    calculerVisibles();
+    construireRail();
+    construireGrille();
+  }
+
+  /* ---------- toucher ---------- */
+
+  function relacher() {
+    if (presse) {
+      presse.style.borderColor = presse.getAttribute("data-col");
+      presse.style.background = "#FFFFFF";
+      presse = null;
+    }
+  }
+
+  function remonter(n, attr, stop) {
+    while (n && n !== stop) {
+      if (n.getAttribute && n.getAttribute(attr) !== null) { return n; }
+      n = n.parentNode;
+    }
+    return null;
+  }
+
+  function appui(cible) {
+    debloquerAudio();
+
+    var pg = remonter(cible, "data-page", bandePages);
+    if (pg) { allerPage(parseInt(pg.getAttribute("data-page"), 10)); return; }
+
+    var fl = remonter(cible, "data-dir", bandePages);
+    if (fl) { allerPage(page + parseInt(fl.getAttribute("data-dir"), 10)); return; }
+
+    var cat = remonter(cible, "data-cat", railCats);
+    if (cat) {
+      var idx = parseInt(cat.getAttribute("data-cat"), 10);
+      if (idx !== actif) { actif = idx; page = 0; marquerActif(); construireGrille(); }
+      return;
+    }
+
+    var cell = remonter(cible, "data-mot", grid);
+    if (cell) {
+      var i = parseInt(cell.getAttribute("data-mot"), 10);
+      var mot = visibles[actif].mots[i];
+      var card = cell.firstChild;
+      relacher();
+      card.setAttribute("data-col", visibles[actif].couleur);
+      card.style.borderColor = "#232B3E";
+      card.style.background = "#F1EDE4";
+      presse = card;
+      window.setTimeout(relacher, 260);
+      parler(mot);
+    }
+  }
+
+  var tactile = false;
+  function ouvert() { return panneau.style.display === "block"; }
+
+  document.addEventListener("touchstart", function (e) {
+    tactile = true;
+    if (ouvert()) { return; }
+    if (e.touches.length > 1) { e.preventDefault(); return; }
+    appui(e.target);
+    e.preventDefault();
+  }, false);
+
+  document.addEventListener("touchmove", function (e) {
+    if (!ouvert()) { e.preventDefault(); }
+  }, false);
+
+  document.addEventListener("mousedown", function (e) {
+    if (tactile || ouvert()) { return; }
+    appui(e.target);
+  }, false);
+
+  document.addEventListener("contextmenu", function (e) { e.preventDefault(); }, false);
+  document.addEventListener("gesturestart", function (e) { e.preventDefault(); }, false);
+
+  /* ---------- panneau : appui long de 3 s sur le titre ---------- */
+
+  var minuteur = null;
+  var titre = document.getElementById("titre");
+
+  function departLong() { minuteur = window.setTimeout(ouvrirPanneau, 3000); }
+  function finLong() { if (minuteur) { window.clearTimeout(minuteur); minuteur = null; } }
+  titre.addEventListener("touchstart", departLong, false);
+  titre.addEventListener("touchend", finLong, false);
+  titre.addEventListener("touchcancel", finLong, false);
+  titre.addEventListener("mousedown", departLong, false);
+  titre.addEventListener("mouseup", finLong, false);
+
+  function ligneBascule(cle, texte, sousTexte) {
+    var d = el("div", "bascule " + (estMasque(cle) ? "non" : "oui"));
+    d.setAttribute("data-cle", cle);
+    d.appendChild(el("div", "coche"));
+    d.appendChild(document.createTextNode(texte));
+    if (sousTexte) {
+      var s = el("div", "note");
+      s.style.margin = "2px 0 0 0";
+      s.appendChild(document.createTextNode(sousTexte));
+      d.appendChild(s);
+    }
+    return d;
+  }
+
+  function dessinerPanneau() {
+    pcorps.innerHTML = "";
+
+    var h = el("h3");
+    h.appendChild(document.createTextNode("Catégories affichées"));
+    pcorps.appendChild(h);
+    for (var i = 0; i < TOUTES.length; i++) {
+      var c = TOUTES[i];
+      var cache = 0;
+      for (var k = 0; k < c.mots.length; k++) {
+        if (estMasque("mot:" + c.mots[k].id)) { cache++; }
+      }
+      pcorps.appendChild(ligneBascule(
+        "cat:" + c.id, c.nom,
+        cache ? (cache + " mot(s) masqué(s) dans cette catégorie") : null));
+    }
+
+    var h2 = el("h3");
+    h2.appendChild(document.createTextNode("Mots de « " + TOUTES[iCat].nom + " »"));
+    pcorps.appendChild(h2);
+    var nav = el("div");
+    for (var j = 0; j < TOUTES.length; j++) {
+      var b = el("span", "bouton");
+      b.style.fontSize = "14px";
+      b.style.padding = "8px 12px";
+      if (j === iCat) { b.style.background = "#232B3E"; b.style.color = "#FFF"; }
+      b.setAttribute("data-choix", String(j));
+      b.appendChild(document.createTextNode(TOUTES[j].nom));
+      nav.appendChild(b);
+    }
+    pcorps.appendChild(nav);
+    for (var m = 0; m < TOUTES[iCat].mots.length; m++) {
+      var mot = TOUTES[iCat].mots[m];
+      pcorps.appendChild(ligneBascule("mot:" + mot.id, mot.mot));
+    }
+
+    var h3 = el("h3");
+    h3.appendChild(document.createTextNode("Vérification"));
+    pcorps.appendChild(h3);
+    var d = el("div", "note");
+    var total = 0;
+    for (var t = 0; t < TOUTES.length; t++) { total += TOUTES[t].mots.length; }
+    var txt = total + " mots dans le fichier. ";
+    txt += manquants.images.length
+      ? "Pictogrammes manquants : " + manquants.images.join(", ") + ". "
+      : "Pictogrammes : tous chargés. ";
+    txt += manquants.sons.length
+      ? "Sons manquants : " + manquants.sons.join(", ") + "."
+      : "Sons : aucun problème détecté.";
+    if (!stockageOk) {
+      txt += " Attention : cette tablette ne mémorise pas les masquages, ils seront";
+      txt += " perdus au redémarrage de l'application.";
+    }
+    d.appendChild(document.createTextNode(txt));
+    pcorps.appendChild(d);
+
+    var tout = el("div", "bouton");
+    tout.setAttribute("data-tout", "1");
+    tout.appendChild(document.createTextNode("Tout réafficher"));
+    pcorps.appendChild(tout);
+
+    sectionApplication();
+  }
+
+  /* ---------- version installée et mise à jour ---------- */
+
+  var estWeb = window.location.protocol.indexOf("http") === 0;
+
+  function sectionApplication() {
+    var h = el("h3");
+    h.appendChild(document.createTextNode("Application"));
+    pcorps.appendChild(h);
+
+    var d = el("div", "note");
+    d.id = "majinfo";
+    d.appendChild(document.createTextNode(texteVersion()));
+    pcorps.appendChild(d);
+
+    if (estWeb) {
+      var b = el("div", "bouton");
+      b.setAttribute("data-maj", "1");
+      b.appendChild(document.createTextNode("Chercher une mise à jour"));
+      pcorps.appendChild(b);
+      compterCache();
+    }
+  }
+
+  function texteVersion() {
+    var v = "Version installée : " + (window.VERSION || "inconnue") + ".";
+    if (!estWeb) {
+      v += " Application ouverte depuis un fichier local : les mises à jour se"
+         + " font en recopiant le dossier.";
+    }
+    return v;
+  }
+
+  function majTexte(t) {
+    var d = document.getElementById("majinfo");
+    if (d) { d.innerHTML = ""; d.appendChild(document.createTextNode(t)); }
+  }
+
+  function compterCache() {
+    try {
+      if (!window.caches) { return; }
+      window.caches.keys().then(function (l) {
+        if (!l.length) { return; }
+        window.caches.open(l[0]).then(function (c) {
+          c.keys().then(function (k) {
+            majTexte(texteVersion() + " " + k.length
+                     + " fichiers disponibles hors connexion.");
+          });
+        });
+      });
+    } catch (e) {}
+  }
+
+  function chercherMaj() {
+    majTexte("Vérification en cours...");
+    window.fetch("version.json?t=" + new Date().getTime(), { cache: "no-store" })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d.v === window.VERSION) {
+          majTexte("Déjà à jour (version " + d.v + ").");
+          return;
+        }
+        majTexte("Nouvelle version " + d.v + " — téléchargement, garde le wifi"
+                 + " quelques secondes...");
+        navigator.serviceWorker.getRegistration().then(function (reg) {
+          if (!reg) { window.location.reload(); return; }
+          reg.update();
+          window.setTimeout(function () { window.location.reload(); }, 8000);
+        });
+      })["catch"](function () {
+        majTexte("Pas de connexion — l'application garde sa version actuelle.");
+      });
+  }
+
+  var iCat = 0;
+
+  function ouvrirPanneau() {
+    finLong();
+    iCat = 0;
+    for (var i = 0; i < TOUTES.length; i++) {
+      if (visibles.length && TOUTES[i].id === visibles[actif].id) { iCat = i; }
+    }
+    dessinerPanneau();
+    panneau.style.display = "block";
+    panneau.scrollTop = 0;
+  }
+
+  function fermerPanneau() {
+    panneau.style.display = "none";
+    reconstruire();
+  }
+
+  document.getElementById("fermer").addEventListener("click", fermerPanneau, false);
+
+  pcorps.addEventListener("click", function (e) {
+    var n = remonter(e.target, "data-cle", pcorps);
+    if (n) { basculer(n.getAttribute("data-cle")); dessinerPanneau(); return; }
+    n = remonter(e.target, "data-choix", pcorps);
+    if (n) { iCat = parseInt(n.getAttribute("data-choix"), 10); dessinerPanneau(); return; }
+    n = remonter(e.target, "data-tout", pcorps);
+    if (n) { masques = {}; ecrireMasques(); dessinerPanneau(); return; }
+    n = remonter(e.target, "data-maj", pcorps);
+    if (n) { chercherMaj(); }
+  }, false);
+
+  /* ---------- demarrage ---------- */
+
+  titre.firstChild.nodeValue = V.titre || "Je communique";
+  document.title = V.titre || "Je communique";
+  lireMasques();
+  reconstruire();
+
+  /* Service worker : uniquement quand l'application est servie par une adresse
+     web. Ouverte depuis un fichier local (la tablette Android), rien ne change. */
+  if (estWeb && navigator.serviceWorker) {
+    try {
+      navigator.serviceWorker.register("sw.js").then(function () {}, function () {});
+    } catch (e) {}
+  }
+
+  var unefois = function () {
+    var e = document.documentElement;
+    try {
+      if (e.webkitRequestFullScreen) { e.webkitRequestFullScreen(); }
+      else if (e.requestFullscreen) { e.requestFullscreen(); }
+    } catch (err) {}
+    document.removeEventListener("touchend", unefois, false);
+    document.removeEventListener("mouseup", unefois, false);
+  };
+  document.addEventListener("touchend", unefois, false);
+  document.addEventListener("mouseup", unefois, false);
+
+}());
+</script>
+</body>
+</html>
