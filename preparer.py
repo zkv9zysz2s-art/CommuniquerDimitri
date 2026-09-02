@@ -337,11 +337,46 @@ self.addEventListener("activate", function (e) {
   }).then(function () { return self.clients.claim(); }));
 });
 
+/* Les fichiers son sont demandes par tranches d'octets (en-tete Range).
+   Safari, sur iPad, refuse une reponse complete a une demande de tranche :
+   sans ce traitement, les pictogrammes s'affichent hors connexion mais
+   aucun son ne sort. On decoupe donc nous-memes la tranche demandee. */
+function tranche(requete, entete) {
+  return caches.match(requete, { ignoreSearch: true, ignoreVary: true })
+    .then(function (rep) {
+      if (!rep) { return fetch(requete); }
+      return rep.arrayBuffer().then(function (buf) {
+        var total = buf.byteLength;
+        var m = /bytes=(\\d*)-(\\d*)/.exec(entete) || [];
+        var debut = m[1] ? parseInt(m[1], 10) : 0;
+        var fin = m[2] ? parseInt(m[2], 10) : total - 1;
+        if (isNaN(debut) || debut < 0) { debut = 0; }
+        if (isNaN(fin) || fin >= total) { fin = total - 1; }
+        if (debut > fin) { debut = 0; }
+        var part = buf.slice(debut, fin + 1);
+        return new Response(part, {
+          status: 206,
+          statusText: "Partial Content",
+          headers: {
+            "Content-Type": rep.headers.get("Content-Type") || "audio/wav",
+            "Content-Length": String(part.byteLength),
+            "Content-Range": "bytes " + debut + "-" + fin + "/" + total,
+            "Accept-Ranges": "bytes"
+          }
+        });
+      });
+    });
+}
+
 self.addEventListener("fetch", function (e) {
   if (e.request.method !== "GET") { return; }
   if (e.request.url.indexOf("version.json") >= 0) { return; }
+
+  var entete = e.request.headers.get("range");
+  if (entete) { e.respondWith(tranche(e.request, entete)); return; }
+
   e.respondWith(
-    caches.match(e.request, { ignoreSearch: true }).then(function (r) {
+    caches.match(e.request, { ignoreSearch: true, ignoreVary: true }).then(function (r) {
       if (r) { return r; }
       return fetch(e.request).then(function (rep) {
         if (rep && rep.status === 200 && rep.type === "basic") {
